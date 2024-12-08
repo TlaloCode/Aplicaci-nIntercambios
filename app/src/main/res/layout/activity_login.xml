@@ -35,7 +35,7 @@
         <EditText
             android:id="@+id/emailEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:hint="Correo electrónico"
             android:inputType="textEmailAddress"
             android:layout_marginHorizontal="32dp"
@@ -45,7 +45,7 @@
         <EditText
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:hint="Contraseña"
             android:inputType="textPassword"
             android:layout_marginHorizontal="32dp"
