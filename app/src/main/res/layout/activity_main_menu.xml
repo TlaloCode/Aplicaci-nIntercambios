@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="#ECE0D1">
+
+        <ImageView
+            android:id="@+id/logoImageView"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:src="@drawable/logo"
+            android:contentDescription="Logo de la aplicación"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:id="@+id/welcomeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hola, ¿qué te gustaría hacer?"
+            android:textSize="25sp"
+            android:fontFamily="casual"
+            android:textStyle="bold"
+            android:textColor="#734F3E"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/createExchangeButton"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:text="Crear intercambio"
+            android:layout_marginBottom="28dp"
+            android:backgroundTint="#417144"
+            android:fontFamily="casual"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/listExchangesButton"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:text="Lista de intercambios"
+            android:layout_marginBottom="28dp"
+            android:fontFamily="casual"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:backgroundTint="#417144"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/advanceDateButton"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:text="Adelantar la fecha del sorteo"
+            android:backgroundTint="#417144"
+            android:fontFamily="casual"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
