@@ -58,7 +58,19 @@
             android:id="@+id/advanceDateButton"
             android:layout_width="match_parent"
             android:layout_height="58dp"
+            android:layout_marginBottom="28dp"
             android:text="Adelantar la fecha del sorteo"
+            android:backgroundTint="#417144"
+            android:fontFamily="casual"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/enterExchangeButton"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:text="Ingresar a un intercambio"
             android:backgroundTint="#417144"
             android:fontFamily="casual"
             android:textStyle="bold"
