@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.text.InputType
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -57,18 +58,35 @@ class CreateExchangeActivity: AppCompatActivity() {
     }
 
     private fun addParticipantManually() {
-        val input = EditText(this)
-        input.hint = "Nombre del participante"
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(50, 40, 50, 10) // Padding opcional para mejorar la presentación
+        }
+
+        val nameInput = EditText(this).apply {
+            hint = "Nombre del participante"
+        }
+
+        val emailInput = EditText(this).apply {
+            hint = "Correo Electronico"
+            inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+        }
+
+        layout.addView(nameInput)
+        layout.addView(emailInput)
 
         AlertDialog.Builder(this)
             .setTitle("Agregar Participante")
-            .setView(input)
+            .setView(layout)
             .setPositiveButton("Agregar") { _, _ ->
-                val name = input.text.toString()
-                if (name.isNotEmpty()) {
+                val name = nameInput.text.toString()
+                val email = emailInput.text.toString()
+
+                if (name.isNotEmpty() && email.isNotEmpty()) {
                     addParticipantToList(name)
+                    addParticipantToDB(name,email)
                 } else {
-                    Toast.makeText(this, "Nombre vacío", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Debe llenar ambos campos", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancelar", null)
@@ -114,7 +132,6 @@ class CreateExchangeActivity: AppCompatActivity() {
         if (exchangeId != -1L) {
             dbHelper.addParticipant(exchangeId, name, email)
             sendEmailInvitation(email, "Intercambio Navideño", "https://example.com/confirm?email=$email")
-            addParticipantToList(name)
         } else {
             Toast.makeText(this, "Primero guarda el intercambio", Toast.LENGTH_SHORT).show()
         }
