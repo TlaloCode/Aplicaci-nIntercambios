@@ -2,6 +2,7 @@ package com.example.proyectomoviles
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.InputType
@@ -21,6 +22,8 @@ class CreateExchangeActivity: AppCompatActivity() {
     private lateinit var dbHelper: DatabaseHelper
     private var exchangeId: Long = -1L
     private var participantCount = 0
+    private val participantList = mutableListOf<Map<String, String>>() // Lista temporal de participantes
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +87,8 @@ class CreateExchangeActivity: AppCompatActivity() {
 
                 if (name.isNotEmpty() && email.isNotEmpty()) {
                     addParticipantToList(name)
-                    addParticipantToDB(name,email)
+                    participantList.add(mapOf("name" to name, "email" to email))
+                    //addParticipantToDB(name,email)
                 } else {
                     Toast.makeText(this, "Debe llenar ambos campos", Toast.LENGTH_SHORT).show()
                 }
@@ -128,10 +132,10 @@ class CreateExchangeActivity: AppCompatActivity() {
     }
 
     // Agregar participante a la base de datos y a la lista visual
-    private fun addParticipantToDB(name: String, email: String) {
-        if (exchangeId != -1L) {
-            dbHelper.addParticipant(exchangeId, name, email)
-            sendEmailInvitation(email, "Intercambio Navideño", "https://example.com/confirm?email=$email")
+    private fun addParticipantToDB(id: Long, name: String, email: String) {
+        if (id != -1L) {
+            dbHelper.addParticipant(id, name, email)
+            //sendEmailInvitation(email, "Intercambio Navideño", "https://example.com/confirm?email=$email")
         } else {
             Toast.makeText(this, "Primero guarda el intercambio", Toast.LENGTH_SHORT).show()
         }
@@ -149,6 +153,7 @@ class CreateExchangeActivity: AppCompatActivity() {
     }
 
     private fun saveExchange() {
+        println("Hola mundo")
         val theme1 = findViewById<EditText>(R.id.themeEditText1).text.toString()
         val theme2 = findViewById<EditText>(R.id.themeEditText2).text.toString()
         val theme3 = findViewById<EditText>(R.id.themeEditText3).text.toString()
@@ -156,10 +161,18 @@ class CreateExchangeActivity: AppCompatActivity() {
         val location = findViewById<EditText>(R.id.exchangeLocationEditText).text.toString()
 
         if (theme1.isNotEmpty() && date.isNotEmpty() && location.isNotEmpty()) {
-            val exchangeId = dbHelper.addExchange(
-                "Intercambio Navideño", theme1, theme2, theme3, date, location, 1
-            )
+            val userId = getLoggedInUserId()
+            if (userId == -1L) {
+                Toast.makeText(this, "Error: Usuario no identificado", Toast.LENGTH_SHORT).show()
+                return
+            }
+            val exchangeId = dbHelper.addExchange(theme1, theme2, theme3, date, location, userId)
             if (exchangeId != -1L) {
+                for (participant in participantList) {
+                    val name = participant["name"] ?: continue
+                    val email = participant["email"] ?: continue
+                    addParticipantToDB(exchangeId, name, email)
+                }
                 Toast.makeText(this, "Intercambio creado exitosamente", Toast.LENGTH_SHORT).show()
                 val code = dbHelper.getExchangeCode(exchangeId)
                 sendInvitationsToParticipants(exchangeId, code)
@@ -173,18 +186,17 @@ class CreateExchangeActivity: AppCompatActivity() {
     // Método para enviar correos electrónicos a todos los participantes
     private fun sendInvitationsToParticipants(exchangeId: Long, code: String) {
         val participants = dbHelper.getParticipantsForExchange(exchangeId)
-        val exchangeName = "Intercambio Navideño"
-
         for (participant in participants) {
+            println(participant)
             val email = participant["email"] ?: continue
-            sendEmailInvitation(email, exchangeName, code)
+            sendEmailInvitation(email, code)
         }
     }
 
     // Método para enviar el correo electrónico
-    private fun sendEmailInvitation(email: String, exchangeName: String, code: String) {
-        val subject = "Invitación al intercambio: $exchangeName"
-        val body = "¡Has sido invitado al intercambio '$exchangeName'!\n\n" +
+    private fun sendEmailInvitation(email: String, code: String) {
+        val subject = "Invitación al intercambio:"
+        val body = "¡Has sido invitado al intercambio '$'!\n\n" +
                 "Código de acceso: $code\n" +
                 "Ingresa este código en la app para confirmar tu participación.\n\n" +
                 "¡Esperamos verte pronto!"
@@ -204,6 +216,12 @@ class CreateExchangeActivity: AppCompatActivity() {
             }
         }.start()
     }
+
+    private fun getLoggedInUserId(): Long {
+        val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        return sharedPreferences.getLong("loggedInUserId", -1) // -1 si no está definido
+    }
+
 
 
 

@@ -9,7 +9,7 @@ class DatabaseHelper(context:Context):
 
     companion object {
         private const val DATABASE_NAME = "QueridoSanta.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
 
         // Tabla de usuarios
         const val TABLE_USERS = "users"
@@ -22,7 +22,6 @@ class DatabaseHelper(context:Context):
         // Tabla de intercambios
         const val TABLE_EXCHANGES = "exchanges"
         const val COLUMN_EXCHANGE_ID = "id"
-        const val COLUMN_EXCHANGE_NAME = "name"
         const val COLUMN_EXCHANGE_THEME1 = "theme1"
         const val COLUMN_EXCHANGE_THEME2 = "theme2"
         const val COLUMN_EXCHANGE_THEME3 = "theme3"
@@ -55,7 +54,6 @@ class DatabaseHelper(context:Context):
         val CREATE_EXCHANGES_TABLE = """
             CREATE TABLE $TABLE_EXCHANGES (
                 $COLUMN_EXCHANGE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COLUMN_EXCHANGE_NAME TEXT,
                 $COLUMN_EXCHANGE_THEME1 TEXT,
                 $COLUMN_EXCHANGE_THEME2 TEXT,
                 $COLUMN_EXCHANGE_THEME3 TEXT,
@@ -105,11 +103,10 @@ class DatabaseHelper(context:Context):
     }
 
     // Método para crear un intercambio
-    fun addExchange(name: String, theme1: String, theme2: String, theme3: String, date: String, location: String, userId: Int): Long {
+    fun addExchange(theme1: String, theme2: String, theme3: String, date: String, location: String, userId: Long): Long {
         val db = writableDatabase
         val exchangeCode = generateExchangeCode()
         val values = ContentValues().apply {
-            put(COLUMN_EXCHANGE_NAME, name)
             put(COLUMN_EXCHANGE_THEME1, theme1)
             put(COLUMN_EXCHANGE_THEME2, theme2)
             put(COLUMN_EXCHANGE_THEME3, theme3)
@@ -124,17 +121,22 @@ class DatabaseHelper(context:Context):
     }
 
     // Método para validar usuario
-    fun validateUser(email: String, password: String): Boolean {
+    fun validateUser(email: String, password: String): Long {
         val db = readableDatabase
-        val query = """
-            SELECT * FROM $TABLE_USERS
-            WHERE $COLUMN_USER_EMAIL = ? AND $COLUMN_USER_PASSWORD = ?
-        """
-        val cursor = db.rawQuery(query, arrayOf(email, password))
-        val isValid = cursor.count > 0
+        val cursor = db.rawQuery(
+            "SELECT $COLUMN_USER_ID FROM $TABLE_USERS WHERE $COLUMN_USER_EMAIL = ? AND $COLUMN_USER_PASSWORD = ?",
+            arrayOf(email, password)
+        )
+
+        val userId = if (cursor.moveToFirst()) {
+            cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)) // Obtener el ID del usuario
+        } else {
+            -1L // Usuario no encontrado
+        }
+
         cursor.close()
         db.close()
-        return isValid
+        return userId
     }
 
     fun addParticipant(exchangeId: Long, name: String, email: String): Long {

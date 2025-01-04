@@ -24,8 +24,9 @@ class LoginActivity: AppCompatActivity() {
             val password = passwordEditText.text.toString()
 
             if (email.isNotEmpty() && password.isNotEmpty()) {
-                val isValid = dbHelper.validateUser(email, password)
-                if (isValid) {
+                val userId  = dbHelper.validateUser(email, password)
+                if (userId != -1L) {
+                    onLoginSuccess(userId)
                     Toast.makeText(this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, MainMenuActivity::class.java)
                     startActivity(intent)
@@ -45,5 +46,14 @@ class LoginActivity: AppCompatActivity() {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    private fun onLoginSuccess(userId: Long) {
+        // Guardar el ID del usuario en SharedPreferences
+        val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putLong("loggedInUserId", userId)
+        editor.apply()
+        println("El id de este usuario es: $userId")
     }
 }
