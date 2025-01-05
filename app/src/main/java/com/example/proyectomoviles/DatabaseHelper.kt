@@ -2,6 +2,7 @@ package com.example.proyectomoviles
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 class DatabaseHelper(context:Context):
@@ -9,7 +10,7 @@ class DatabaseHelper(context:Context):
 
     companion object {
         private const val DATABASE_NAME = "QueridoSanta.db"
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 4
 
         // Tabla de usuarios
         const val TABLE_USERS = "users"
@@ -25,8 +26,12 @@ class DatabaseHelper(context:Context):
         const val COLUMN_EXCHANGE_THEME1 = "theme1"
         const val COLUMN_EXCHANGE_THEME2 = "theme2"
         const val COLUMN_EXCHANGE_THEME3 = "theme3"
+        const val COLUMN_EXCHANGE_AMOUNT = "amount"
+        const val COLUMN_EXCHANGE_DEADLINE = "deadline"
+        const val COLUMN_EXCHANGE_HOUR = "hour"
         const val COLUMN_EXCHANGE_DATE = "date"
         const val COLUMN_EXCHANGE_LOCATION = "location"
+        const val COLUMN_EXCHANGE_ADDITIONAL = "data"
         const val COLUMN_EXCHANGE_CODE  = "code" // Código único del participante
         const val COLUMN_USER_ID_FK = "user_id"
 
@@ -57,8 +62,12 @@ class DatabaseHelper(context:Context):
                 $COLUMN_EXCHANGE_THEME1 TEXT,
                 $COLUMN_EXCHANGE_THEME2 TEXT,
                 $COLUMN_EXCHANGE_THEME3 TEXT,
+                $COLUMN_EXCHANGE_AMOUNT TEXT,
+                $COLUMN_EXCHANGE_DEADLINE TEXT,
+                $COLUMN_EXCHANGE_HOUR TEXT,
                 $COLUMN_EXCHANGE_DATE TEXT,
                 $COLUMN_EXCHANGE_LOCATION TEXT,
+                $COLUMN_EXCHANGE_ADDITIONAL TEXT,
                 $COLUMN_USER_ID_FK INTEGER,
                 $COLUMN_EXCHANGE_CODE TEXT UNIQUE NOT NULL,
                 FOREIGN KEY ($COLUMN_USER_ID_FK) REFERENCES $TABLE_USERS($COLUMN_USER_ID)
@@ -103,15 +112,20 @@ class DatabaseHelper(context:Context):
     }
 
     // Método para crear un intercambio
-    fun addExchange(theme1: String, theme2: String, theme3: String, date: String, location: String, userId: Long): Long {
+    fun addExchange(theme1: String, theme2: String, theme3: String, amount: String,deadline:String,
+                    hour:String, date: String, location: String, data: String, userId: Long): Long {
         val db = writableDatabase
         val exchangeCode = generateExchangeCode()
         val values = ContentValues().apply {
             put(COLUMN_EXCHANGE_THEME1, theme1)
             put(COLUMN_EXCHANGE_THEME2, theme2)
             put(COLUMN_EXCHANGE_THEME3, theme3)
+            put(COLUMN_EXCHANGE_AMOUNT,amount)
+            put(COLUMN_EXCHANGE_DEADLINE,deadline)
+            put(COLUMN_EXCHANGE_HOUR,hour)
             put(COLUMN_EXCHANGE_DATE, date)
             put(COLUMN_EXCHANGE_LOCATION, location)
+            put(COLUMN_EXCHANGE_ADDITIONAL,data)
             put(COLUMN_EXCHANGE_CODE, exchangeCode)
             put(COLUMN_USER_ID_FK, userId)
         }
@@ -246,6 +260,58 @@ class DatabaseHelper(context:Context):
 
         return participants
     }
+
+    fun getAllExchanges(): Cursor {
+        val db = readableDatabase
+        return db.rawQuery("SELECT * FROM $TABLE_EXCHANGES", null)
+    }
+
+    fun getExchangeById(exchangeId: String): Cursor {
+        val db = readableDatabase
+        return db.rawQuery("SELECT * FROM $TABLE_EXCHANGES WHERE id = ?", arrayOf(exchangeId))
+    }
+
+    fun getParticipantsByExchangeId(exchangeId: String): List<Map<String, String>> {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT $COLUMN_PARTICIPANT_NAME, $COLUMN_PARTICIPANT_STATUS FROM $TABLE_PARTICIPANTS WHERE $COLUMN_EXCHANGE_ID_FK = ?",
+            arrayOf(exchangeId)
+        )
+
+        val participants = mutableListOf<Map<String, String>>()
+        while (cursor.moveToNext()) {
+            participants.add(
+                mapOf(
+                    "name" to cursor.getString(cursor.getColumnIndexOrThrow("name")),
+                    "status" to cursor.getString(cursor.getColumnIndexOrThrow("status"))
+                )
+            )
+        }
+        cursor.close()
+        return participants
+    }
+
+    fun deleteExchange(exchangeId: String) {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            // Eliminar participantes asociados
+            db.delete("participants", "exchange_id = ?", arrayOf(exchangeId))
+
+            // Eliminar el intercambio
+            db.delete("exchanges", "id = ?", arrayOf(exchangeId))
+
+            db.setTransactionSuccessful()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+
+
+
 
 
 

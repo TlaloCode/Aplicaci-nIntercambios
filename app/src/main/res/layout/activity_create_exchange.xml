@@ -142,7 +142,7 @@
                 android:layout_height="48dp"
                 android:text="Lista de participantes"
                 android:textSize="18sp"
-                android:textColor="#734F3E"
+                android:textColor="#010101"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp" />
 

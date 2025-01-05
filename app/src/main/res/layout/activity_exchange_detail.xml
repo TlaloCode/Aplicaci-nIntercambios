@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ECE0D1"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/exchangeCodeTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Código del intercambio: "
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeTheme1TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="Temática 1:"
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeTheme2TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="Temática 2:"
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeTheme3TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="Temática 3:"
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeAmountTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="Monto Máximo por regalo:"
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeDeadlineTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="Fecha Límite de registro:"
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeHourTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="Hora:"
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeDateTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Fecha:"
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeLocationTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lugar:"
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/exchangeDataTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Datos adicionales: "
+                android:textColor="#734F3E"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/acceptedParticipantsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Participantes que aceptaron"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/pendingParticipantsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Participación pendiente"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:paddingBottom="8dp"/>
+
+            <!-- Botones -->
+            <Button
+                android:id="@+id/acceptButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Aceptar"
+                android:backgroundTint="#417144"
+                android:fontFamily="casual"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/advanceDateButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Adelantar fecha del intercambio"
+                android:backgroundTint="#417144"
+                android:fontFamily="casual"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Eliminar"
+                android:backgroundTint="#BF4330"
+                android:fontFamily="casual"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

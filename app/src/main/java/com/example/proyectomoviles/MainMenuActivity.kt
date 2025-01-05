@@ -19,13 +19,13 @@ class MainMenuActivity: AppCompatActivity() {
             val intent = Intent(this, CreateExchangeActivity::class.java)
             startActivity(intent)
         }
-/*
+
         // Navegar a la actividad para listar intercambios
         listExchangesButton.setOnClickListener {
-            val intent = Intent(this, ListExchangesActivity::class.java)
+            val intent = Intent(this, ExchangeListActivity::class.java)
             startActivity(intent)
         }
-
+/*
         // Navegar a la actividad para adelantar fecha del sorteo
         advanceDateButton.setOnClickListener {
             val intent = Intent(this, AdvanceDateActivity::class.java)

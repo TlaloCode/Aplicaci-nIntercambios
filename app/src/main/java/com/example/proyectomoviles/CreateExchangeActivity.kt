@@ -15,6 +15,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import android.telephony.SmsManager
+
 
 class CreateExchangeActivity: AppCompatActivity() {
 
@@ -23,6 +25,8 @@ class CreateExchangeActivity: AppCompatActivity() {
     private var exchangeId: Long = -1L
     private var participantCount = 0
     private val participantList = mutableListOf<Map<String, String>>() // Lista temporal de participantes
+    private val participantListSMS = mutableListOf<Map<String, String>>()
+    val SMS_PERMISSION_REQUEST_CODE = 101
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,25 +112,40 @@ class CreateExchangeActivity: AppCompatActivity() {
     }
 
     private fun selectFromContacts() {
+        // Consultar los contactos
         val cursor = contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            null, null, null, null
+            arrayOf(
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER
+            ), // Solo seleccionamos las columnas necesarias
+            null, null, null
         )
 
-        val contactList = mutableListOf<String>()
+        val contactList = mutableListOf<Map<String, String>>() // Lista de mapas para almacenar nombre y número
+
+        // Iterar sobre los contactos
         while (cursor?.moveToNext() == true) {
-            val name =
-                cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
-            contactList.add(name)
+            val name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+            val number = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER))
+
+            contactList.add(mapOf("name" to name, "number" to number)) // Guardar en la lista
         }
         cursor?.close()
 
-        val contactsArray = contactList.toTypedArray()
+        // Crear un arreglo con los nombres para mostrar en el diálogo
+        val contactNames = contactList.map { it["name"] ?: "Desconocido" }.toTypedArray()
 
         AlertDialog.Builder(this)
             .setTitle("Seleccionar Contacto")
-            .setItems(contactsArray) { _, which ->
-                addParticipantToList(contactsArray[which])
+            .setItems(contactNames) { _, which ->
+                val selectedContact = contactList[which]
+                val selectedName = selectedContact["name"] ?: "Desconocido"
+                val selectedNumber = selectedContact["number"] ?: ""
+
+                // Agregar el contacto seleccionado a la lista temporal local
+                addParticipantToList(selectedName)
+                participantListSMS.add(mapOf("name" to selectedName, "number" to selectedNumber))
             }
             .show()
     }
@@ -148,6 +167,7 @@ class CreateExchangeActivity: AppCompatActivity() {
             text = "$name"
             textSize = 16f
             setPadding(8, 8, 8, 8)
+            setTextColor(getColor(R.color.black)) // Define el color
         }
         participantsListLayout.addView(participantTextView)
     }
@@ -158,7 +178,12 @@ class CreateExchangeActivity: AppCompatActivity() {
         val theme2 = findViewById<EditText>(R.id.themeEditText2).text.toString()
         val theme3 = findViewById<EditText>(R.id.themeEditText3).text.toString()
         val date = findViewById<EditText>(R.id.exchangeDateEditText).text.toString()
+        val max_amount = findViewById<EditText>(R.id.amountEditText).text.toString()
+        val hour = findViewById<EditText>(R.id.exchangeTimeEditText).text.toString()
+        val deadlinedate = findViewById<EditText>(R.id.registrationDeadlineEditText).text.toString()
         val location = findViewById<EditText>(R.id.exchangeLocationEditText).text.toString()
+        val additional = findViewById<EditText>(R.id.additionalDetailsEditText).text.toString()
+
 
         if (theme1.isNotEmpty() && date.isNotEmpty() && location.isNotEmpty()) {
             val userId = getLoggedInUserId()
@@ -166,17 +191,25 @@ class CreateExchangeActivity: AppCompatActivity() {
                 Toast.makeText(this, "Error: Usuario no identificado", Toast.LENGTH_SHORT).show()
                 return
             }
-            val exchangeId = dbHelper.addExchange(theme1, theme2, theme3, date, location, userId)
+            val exchangeId = dbHelper.addExchange(theme1, theme2, theme3,max_amount,deadlinedate,
+                hour,date, location, additional,userId)
             if (exchangeId != -1L) {
                 for (participant in participantList) {
                     val name = participant["name"] ?: continue
                     val email = participant["email"] ?: continue
                     addParticipantToDB(exchangeId, name, email)
                 }
+                for (participant in participantListSMS){
+                    val name = participant["name"] ?: continue
+                    val phoneNumber = participant["number"] ?: continue
+                    addParticipantToDB(exchangeId,name,phoneNumber)
+                }
                 Toast.makeText(this, "Intercambio creado exitosamente", Toast.LENGTH_SHORT).show()
                 val code = dbHelper.getExchangeCode(exchangeId)
                 sendInvitationsToParticipants(exchangeId, code)
                 Toast.makeText(this, "Código del intercambio: $code", Toast.LENGTH_LONG).show()
+                startActivity(Intent(this, ExchangeListActivity::class.java))
+                finish()
             }
         } else {
             Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
@@ -188,9 +221,19 @@ class CreateExchangeActivity: AppCompatActivity() {
         val participants = dbHelper.getParticipantsForExchange(exchangeId)
         for (participant in participants) {
             println(participant)
-            val email = participant["email"] ?: continue
-            sendEmailInvitation(email, code)
-        }
+            val contacto = participant["email"] ?: continue
+            if (contacto.contains("@")) {
+                sendEmailInvitation(contacto, code)
+            } else {
+                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS)
+                    == PackageManager.PERMISSION_GRANTED
+                ) {
+                    sendSmsInvitation(contacto, code)
+                } else {
+                    checkAndRequestSmsPermission()
+                }
+            }
+            }
     }
 
     // Método para enviar el correo electrónico
@@ -217,13 +260,22 @@ class CreateExchangeActivity: AppCompatActivity() {
         }.start()
     }
 
+    fun sendSmsInvitation(phoneNumber: String, code: String) {
+        val message = "¡Has sido invitado a un intercambio!, el código de acceso es $code"
+        try {
+            val smsManager = SmsManager.getDefault()
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null)
+            Toast.makeText(this, "SMS enviado a $phoneNumber", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Error al enviar SMS a $phoneNumber", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun getLoggedInUserId(): Long {
         val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         return sharedPreferences.getLong("loggedInUserId", -1) // -1 si no está definido
     }
-
-
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
@@ -237,5 +289,19 @@ class CreateExchangeActivity: AppCompatActivity() {
             Toast.makeText(this, "Permiso denegado", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun checkAndRequestSmsPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.SEND_SMS),
+                101
+            )
+        }
+    }
+
+
 
 }
