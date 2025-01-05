@@ -13,6 +13,7 @@ class MainMenuActivity: AppCompatActivity() {
         val createExchangeButton: Button = findViewById(R.id.createExchangeButton)
         val listExchangesButton: Button = findViewById(R.id.listExchangesButton)
         val advanceDateButton: Button = findViewById(R.id.advanceDateButton)
+        val joinExchangeButton: Button = findViewById(R.id.enterExchangeButton)
 
         // Navegar a la actividad para crear intercambio
         createExchangeButton.setOnClickListener {
@@ -23,6 +24,11 @@ class MainMenuActivity: AppCompatActivity() {
         // Navegar a la actividad para listar intercambios
         listExchangesButton.setOnClickListener {
             val intent = Intent(this, ExchangeListActivity::class.java)
+            startActivity(intent)
+        }
+
+        joinExchangeButton.setOnClickListener {
+            val intent = Intent(this, JoinExchangeActivity::class.java)
             startActivity(intent)
         }
 /*

@@ -2,6 +2,7 @@ package com.example.proyectomoviles
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
@@ -167,7 +168,7 @@ class DatabaseHelper(context:Context):
     }
 
     // Método para confirmar la participación
-    fun confirmParticipation(email: String) {
+    fun confirmParticipation(id: Long) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_PARTICIPANT_STATUS, "aceptado")
@@ -175,11 +176,27 @@ class DatabaseHelper(context:Context):
         db.update(
             TABLE_PARTICIPANTS,
             values,
-            "$COLUMN_PARTICIPANT_EMAIL = ?",
-            arrayOf(email)
+            "$COLUMN_PARTICIPANT_ID = ?",
+            arrayOf(id.toString())
         )
         db.close()
     }
+
+    // Método para declinar la participación
+    fun declineParticipation(id: Long) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_PARTICIPANT_STATUS, "rechazado")
+        }
+        db.update(
+            TABLE_PARTICIPANTS,
+            values,
+            "$COLUMN_PARTICIPANT_ID = ?",
+            arrayOf(id.toString())
+        )
+        db.close()
+    }
+
 
     fun getAllUsers(): List<String> {
         val users = mutableListOf<String>()
@@ -309,9 +326,18 @@ class DatabaseHelper(context:Context):
         }
     }
 
-
-
-
+    fun getExchangeIdByCode(code: String): String? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT id FROM exchanges WHERE code = ?", arrayOf(code))
+        return if (cursor.moveToFirst()) {
+            val exchangeId = cursor.getString(cursor.getColumnIndexOrThrow("id"))
+            cursor.close()
+            exchangeId
+        } else {
+            cursor.close()
+            null
+        }
+    }
 
 
 

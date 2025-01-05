@@ -132,6 +132,15 @@
                 android:textSize="20sp"
                 android:paddingBottom="8dp"/>
 
+            <TextView
+                android:id="@+id/pendingRejectedTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No participarán"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:paddingBottom="8dp"/>
+
             <!-- Botones -->
             <Button
                 android:id="@+id/acceptButton"

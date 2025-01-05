@@ -25,6 +25,8 @@
         <activity android:name=".CreateExchangeActivity" />
         <activity android:name=".ExchangeListActivity" />
         <activity android:name=".ExchangeDetailActivity"/>
+        <activity android:name=".JoinExchangeActivity"/>
+        <activity android:name=".ConfirmExchangeActivity"/>
     </application>
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.INTERNET" />

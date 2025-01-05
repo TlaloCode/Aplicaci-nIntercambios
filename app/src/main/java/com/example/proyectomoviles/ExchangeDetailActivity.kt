@@ -68,12 +68,15 @@ class ExchangeDetailActivity : AppCompatActivity() {
 
         val acceptedList = participants.filter { it["status"] == "aceptado" }
         val pendingList = participants.filter { it["status"] == "pendiente" }
+        val rejectedList = participants.filter { it["status"] == "rechazado" }
 
         findViewById<TextView>(R.id.acceptedParticipantsTextView).text =
             "Aceptados:\n" + acceptedList.joinToString("\n") { it["name"] ?: "Sin Nombre" }
 
         findViewById<TextView>(R.id.pendingParticipantsTextView).text =
             "Pendientes:\n" + pendingList.joinToString("\n") { it["name"] ?: "Sin Nombre" }
+        findViewById<TextView>(R.id.pendingRejectedTextView).text =
+        "No participarán:\n" + rejectedList.joinToString("\n") { it["name"] ?: "Sin Nombre" }
     }
 
 

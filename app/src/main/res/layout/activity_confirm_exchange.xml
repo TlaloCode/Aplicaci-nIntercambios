@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:background="#ECE0D1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/exchangeDetailsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:paddingBottom="16dp" />
+
+            <TextView
+                android:id="@+id/participantsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lista de participantes"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/confirmParticipationButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Confirmar"
+                android:backgroundTint="#417144"
+                android:textStyle="bold"
+                android:fontFamily="casual"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/declineParticipationButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Declinar"
+                android:backgroundTint="#BF4330"
+                android:textStyle="bold"
+                android:fontFamily="casual"
+                android:textSize="20sp"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
