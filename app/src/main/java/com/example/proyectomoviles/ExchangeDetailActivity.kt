@@ -1,9 +1,13 @@
 package com.example.proyectomoviles
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class ExchangeDetailActivity : AppCompatActivity() {
@@ -25,14 +29,85 @@ class ExchangeDetailActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.advanceDateButton).setOnClickListener {
-            Toast.makeText(this, "Funcionalidad pendiente de implementar", Toast.LENGTH_SHORT).show()
+            val drawManager = DrawManager(this, dbHelper)
+            drawManager.performDraw(exchangeId)
         }
 
         findViewById<Button>(R.id.deleteButton).setOnClickListener {
             deleteExchange(exchangeId)
         }
+
+        findViewById<Button>(R.id.addParticipantButton).setOnClickListener {
+            if (verifyUserPermissions(exchangeId)) {
+                val dialog = AlertDialog.Builder(this)
+                dialog.setTitle("Agregar Participante")
+
+                val layout = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(16, 16, 16, 16)
+                }
+
+                val nameInput = EditText(this).apply { hint = "Nombre" }
+                val emailInput = EditText(this).apply { hint = "Correo Electrónico" }
+
+                layout.addView(nameInput)
+                layout.addView(emailInput)
+                dialog.setView(layout)
+
+                dialog.setPositiveButton("Agregar") { _, _ ->
+                    val name = nameInput.text.toString().trim()
+                    val email = emailInput.text.toString().trim()
+
+                    if (name.isNotEmpty() && email.isNotEmpty()) {
+                        dbHelper.addParticipant(exchangeId!!.toLong(), name, email)
+                        Toast.makeText(this, "Participante agregado", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Completa los campos", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                dialog.setNegativeButton("Cancelar", null)
+                dialog.show()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Solo el creador puede agregar participantes",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        findViewById<Button>(R.id.deleteParticipantButton).setOnClickListener {
+            if (verifyUserPermissions(exchangeId)) {
+                val participants = dbHelper.getParticipantsForExchange(exchangeId!!.toLong())
+                val participantNames = participants.map { it["name"]!! }.toTypedArray()
+
+                val dialog = AlertDialog.Builder(this)
+                dialog.setTitle("Eliminar Participante")
+                dialog.setItems(participantNames) { _, which ->
+                    val participant = participants[which]
+                    dbHelper.deleteParticipant(participant["email"]!!)
+                    Toast.makeText(this, "Participante eliminado", Toast.LENGTH_SHORT).show()
+                }
+                dialog.show()
+            } else {
+                Toast.makeText(this, "Solo el creador puede eliminar participantes", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        findViewById<Button>(R.id.editExchangeButton).setOnClickListener {
+            if (verifyUserPermissions(exchangeId)) {
+                val intent = Intent(this, EditExchangeActivity::class.java)
+                intent.putExtra("EXCHANGE_ID", exchangeId)
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Solo el creador puede editar este intercambio", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         loadParticipants(exchangeId)
     }
+
 
     private fun loadExchangeDetails(exchangeId: String) {
         val cursor = dbHelper.getExchangeById(exchangeId)
@@ -65,7 +140,7 @@ class ExchangeDetailActivity : AppCompatActivity() {
 
     private fun loadParticipants(exchangeId: String) {
         val participants = dbHelper.getParticipantsByExchangeId(exchangeId)
-
+        println(participants)
         val acceptedList = participants.filter { it["status"] == "aceptado" }
         val pendingList = participants.filter { it["status"] == "pendiente" }
         val rejectedList = participants.filter { it["status"] == "rechazado" }
@@ -79,6 +154,25 @@ class ExchangeDetailActivity : AppCompatActivity() {
         "No participarán:\n" + rejectedList.joinToString("\n") { it["name"] ?: "Sin Nombre" }
     }
 
+    private fun verifyUserPermissions(exchangeId: String): Boolean {
+        val currentUserId = getCurrentUserId()
+        if(currentUserId != null)
+        {
+            return dbHelper.isUserCreatorOfExchange(currentUserId, exchangeId!!)
+        }
+        else{
+            return false
+        }
+    }
+
+    private fun getCurrentUserId(): Long? {
+        val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        return if (sharedPreferences.contains("loggedInUserId")) {
+            sharedPreferences.getLong("loggedInUserId", -1L).takeIf { it != -1L }
+        } else {
+            null
+        }
+    }
 
     private fun deleteExchange(exchangeId: String) {
         if (exchangeId != null) {

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/theme1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Temática 1"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/theme2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Temática 2"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/theme3EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Temática 3"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/dateEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Fecha (dd/MM/yyyy)"
+                android:inputType="date"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/locationEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Lugar"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/saveChangesButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Guardar Cambios"
+                android:backgroundTint="#417144"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

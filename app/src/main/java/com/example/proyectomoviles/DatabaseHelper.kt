@@ -11,7 +11,7 @@ class DatabaseHelper(context:Context):
 
     companion object {
         private const val DATABASE_NAME = "QueridoSanta.db"
-        private const val DATABASE_VERSION = 4
+        private const val DATABASE_VERSION = 5
 
         // Tabla de usuarios
         const val TABLE_USERS = "users"
@@ -168,7 +168,7 @@ class DatabaseHelper(context:Context):
     }
 
     // Método para confirmar la participación
-    fun confirmParticipation(id: Long) {
+    fun confirmParticipation(email: String) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_PARTICIPANT_STATUS, "aceptado")
@@ -176,14 +176,14 @@ class DatabaseHelper(context:Context):
         db.update(
             TABLE_PARTICIPANTS,
             values,
-            "$COLUMN_PARTICIPANT_ID = ?",
-            arrayOf(id.toString())
+            "$COLUMN_PARTICIPANT_EMAIL = ?",
+            arrayOf(email)
         )
         db.close()
     }
 
     // Método para declinar la participación
-    fun declineParticipation(id: Long) {
+    fun declineParticipation(email: String) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_PARTICIPANT_STATUS, "rechazado")
@@ -191,11 +191,29 @@ class DatabaseHelper(context:Context):
         db.update(
             TABLE_PARTICIPANTS,
             values,
-            "$COLUMN_PARTICIPANT_ID = ?",
-            arrayOf(id.toString())
+            "$COLUMN_PARTICIPANT_EMAIL = ?",
+            arrayOf(email)
         )
         db.close()
     }
+
+    fun getParticipantEmailById(participantId: Long): String? {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT $COLUMN_PARTICIPANT_EMAIL FROM $TABLE_USERS WHERE id = ?",
+            arrayOf(participantId.toString())
+        )
+
+        val email = if (cursor.moveToFirst()) {
+            cursor.getString(cursor.getColumnIndexOrThrow("email"))
+        } else {
+            null // Retorna null si no se encuentra el participante
+        }
+        cursor.close()
+        db.close()
+        return email
+    }
+
 
 
     fun getAllUsers(): List<String> {
@@ -326,6 +344,13 @@ class DatabaseHelper(context:Context):
         }
     }
 
+    fun deleteParticipant(email: String) {
+        val db = writableDatabase
+        db.delete(TABLE_PARTICIPANTS, "$COLUMN_PARTICIPANT_EMAIL = ?", arrayOf(email))
+        db.close()
+    }
+
+
     fun getExchangeIdByCode(code: String): String? {
         val db = readableDatabase
         val cursor = db.rawQuery("SELECT id FROM exchanges WHERE code = ?", arrayOf(code))
@@ -338,6 +363,98 @@ class DatabaseHelper(context:Context):
             null
         }
     }
+
+    fun getThemesByExchangeId(exchangeId: String): List<String> {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT theme1, theme2, theme3 FROM exchanges WHERE id = ?",
+            arrayOf(exchangeId)
+        )
+
+        val themes = mutableListOf<String>()
+        if (cursor.moveToFirst()) {
+            val theme1 = cursor.getString(cursor.getColumnIndexOrThrow("theme1"))
+            val theme2 = cursor.getString(cursor.getColumnIndexOrThrow("theme2"))
+            val theme3 = cursor.getString(cursor.getColumnIndexOrThrow("theme3"))
+
+            if (!theme1.isNullOrEmpty()) themes.add(theme1)
+            if (!theme2.isNullOrEmpty()) themes.add(theme2)
+            if (!theme3.isNullOrEmpty()) themes.add(theme3)
+        }
+        cursor.close()
+        return themes
+    }
+
+    fun getAcceptedParticipants(exchangeId: String): List<Map<String, String>> {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT name, email FROM participants WHERE exchange_id = ? AND status = ?",
+            arrayOf(exchangeId, "aceptado")
+        )
+
+        val participants = mutableListOf<Map<String, String>>()
+        while (cursor.moveToNext()) {
+            val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+            val email = cursor.getString(cursor.getColumnIndexOrThrow("email"))
+            participants.add(mapOf("name" to name, "email" to email))
+        }
+        cursor.close()
+        return participants
+    }
+
+    fun getAllExchangesWithDates(): List<Map<String, String>> {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT id, date FROM exchanges WHERE draw_done = 0", null)
+
+        val exchanges = mutableListOf<Map<String, String>>()
+        while (cursor.moveToNext()) {
+            exchanges.add(
+                mapOf(
+                    "id" to cursor.getString(cursor.getColumnIndexOrThrow("id")),
+                    "date" to cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                )
+            )
+        }
+        cursor.close()
+        return exchanges
+    }
+
+    fun updateExchangeDetails(exchangeId: String, theme1: String, theme2: String, theme3: String, date: String, location: String) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put("theme1", theme1)
+            put("theme2", theme2)
+            put("theme3", theme3)
+            put("date", date)
+            put("location", location)
+        }
+        db.update("exchanges", values, "id = ?", arrayOf(exchangeId))
+        db.close()
+    }
+
+
+
+    fun isUserCreatorOfExchange(userId: Long, exchangeId: String): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM $TABLE_EXCHANGES WHERE $COLUMN_EXCHANGE_ID = ? AND $COLUMN_USER_ID_FK = ?",
+            arrayOf(exchangeId, userId.toString())
+        )
+
+        val isCreator = if (cursor.moveToFirst()) {
+            cursor.getInt(0) > 0
+        } else {
+            false
+        }
+        cursor.close()
+        db.close()
+        return isCreator
+    }
+
+
+
+
+
 
 
 

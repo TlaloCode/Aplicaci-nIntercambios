@@ -141,18 +141,35 @@
                 android:textSize="20sp"
                 android:paddingBottom="8dp"/>
 
-            <!-- Botones -->
             <Button
-                android:id="@+id/acceptButton"
+                android:id="@+id/addParticipantButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Aceptar"
+                android:text="Agregar Participante"
+                android:layout_marginTop="8dp"
                 android:backgroundTint="#417144"
-                android:fontFamily="casual"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="16dp" />
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/deleteParticipantButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Eliminar Participante"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#BF4330"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/editExchangeButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Editar Detalles"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#b9bb87"
+                android:layout_marginBottom="30dp"
+                android:textColor="@android:color/white" />
+
+            <!-- Botones -->
 
             <Button
                 android:id="@+id/advanceDateButton"
@@ -177,6 +194,18 @@
                 android:textSize="20sp"
                 android:textColor="@android:color/white"
                 android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/acceptButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Regresar"
+                android:backgroundTint="#417144"
+                android:fontFamily="casual"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="16dp" />
 
         </LinearLayout>
     </ScrollView>

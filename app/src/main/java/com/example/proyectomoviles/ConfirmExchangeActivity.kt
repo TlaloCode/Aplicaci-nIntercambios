@@ -1,7 +1,11 @@
 package com.example.proyectomoviles
 
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +14,7 @@ class ConfirmExchangeActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DatabaseHelper
     private var exchangeId: String? = null
+    private var selectedTheme: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,6 +24,7 @@ class ConfirmExchangeActivity : AppCompatActivity() {
         exchangeId = intent.getStringExtra("EXCHANGE_ID")
 
         loadExchangeDetails()
+        setupThemeSpinner()
         setupButtons()
     }
 
@@ -52,13 +58,42 @@ class ConfirmExchangeActivity : AppCompatActivity() {
             "Participantes:\n" + participants.joinToString("\n") { it["name"] ?: "Sin Nombre" }
     }
 
+    private fun setupThemeSpinner() {
+        if (exchangeId == null) return
+
+        // Obtener los temas de regalo desde la base de datos
+        val themes = dbHelper.getThemesByExchangeId(exchangeId!!)
+        val spinner = findViewById<Spinner>(R.id.themeSpinner)
+
+
+        // Configurar el adaptador del Spinner
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, themes)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        // Obtener la selección del usuario
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedTheme = themes[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedTheme = null
+            }
+        }
+    }
+
+
     private fun setupButtons() {
         findViewById<Button>(R.id.confirmParticipationButton).setOnClickListener {
             val currentUserEmail = getCurrentUserId() // Recupera el correo del usuario actual
             println("El usuario actual es: $currentUserEmail")
             if (currentUserEmail != null) {
-                dbHelper.confirmParticipation(currentUserEmail)
+                val email = dbHelper.getParticipantEmailById(currentUserEmail)
+                println("El email recuperado es: $email")
+                dbHelper.confirmParticipation(email.toString())
                 Toast.makeText(this, "Has aceptado el intercambio", Toast.LENGTH_SHORT).show()
+                dbHelper.close() // Cierra la conexión a la base de datos
                 finish()
             } else {
                 Toast.makeText(this, "Error al confirmar participación", Toast.LENGTH_SHORT).show()
@@ -73,7 +108,9 @@ class ConfirmExchangeActivity : AppCompatActivity() {
     private fun declineParticipation() {
         val currentUserEmail = getCurrentUserId() // Recupera el correo del usuario actual
         if (currentUserEmail != null) {
-            dbHelper.declineParticipation(currentUserEmail)
+            val email = dbHelper.getParticipantEmailById(currentUserEmail)
+            println("El email recuperado es: $email")
+            dbHelper.declineParticipation(email.toString())
             Toast.makeText(this, "Has declinado el intercambio", Toast.LENGTH_SHORT).show()
             finish()
         } else {

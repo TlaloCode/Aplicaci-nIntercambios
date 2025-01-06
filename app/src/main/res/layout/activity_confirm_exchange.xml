@@ -27,7 +27,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Lista de participantes"
-                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:fontFamily="casual"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Selecciona tu tema de regalo:"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:fontFamily="casual"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <Spinner
+                android:id="@+id/themeSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp" />
 
             <Button
