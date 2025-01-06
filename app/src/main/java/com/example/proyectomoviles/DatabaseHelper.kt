@@ -34,6 +34,7 @@ class DatabaseHelper(context:Context):
         const val COLUMN_EXCHANGE_LOCATION = "location"
         const val COLUMN_EXCHANGE_ADDITIONAL = "data"
         const val COLUMN_EXCHANGE_CODE  = "code" // Código único del participante
+        const val COLUMN_EXCHANGE_DRAW_DONE = "draw_done"
         const val COLUMN_USER_ID_FK = "user_id"
 
         // Tabla de participantes
@@ -43,6 +44,7 @@ class DatabaseHelper(context:Context):
         const val COLUMN_PARTICIPANT_NAME = "name"
         const val COLUMN_PARTICIPANT_EMAIL = "email"
         const val COLUMN_PARTICIPANT_STATUS = "status"
+        const val COLUMN_PARTICIPANT_SELECTED_THEME = "selected_theme"
     }
 
 
@@ -70,6 +72,7 @@ class DatabaseHelper(context:Context):
                 $COLUMN_EXCHANGE_LOCATION TEXT,
                 $COLUMN_EXCHANGE_ADDITIONAL TEXT,
                 $COLUMN_USER_ID_FK INTEGER,
+                $COLUMN_EXCHANGE_DRAW_DONE INTEGER DEFAULT 0,
                 $COLUMN_EXCHANGE_CODE TEXT UNIQUE NOT NULL,
                 FOREIGN KEY ($COLUMN_USER_ID_FK) REFERENCES $TABLE_USERS($COLUMN_USER_ID)
             )
@@ -81,6 +84,7 @@ class DatabaseHelper(context:Context):
                 $COLUMN_PARTICIPANT_NAME TEXT,
                 $COLUMN_PARTICIPANT_EMAIL TEXT,
                 $COLUMN_PARTICIPANT_STATUS TEXT DEFAULT 'pendiente',
+                $COLUMN_PARTICIPANT_SELECTED_THEME TEXT DEFAULT 'nada',
                 FOREIGN KEY ($COLUMN_EXCHANGE_ID_FK) REFERENCES $TABLE_EXCHANGES($COLUMN_EXCHANGE_ID)
             )
         """
@@ -168,10 +172,11 @@ class DatabaseHelper(context:Context):
     }
 
     // Método para confirmar la participación
-    fun confirmParticipation(email: String) {
+    fun confirmParticipation(email: String, selected_theme: String) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_PARTICIPANT_STATUS, "aceptado")
+            put(COLUMN_PARTICIPANT_SELECTED_THEME, selected_theme)
         }
         db.update(
             TABLE_PARTICIPANTS,
@@ -396,7 +401,8 @@ class DatabaseHelper(context:Context):
         while (cursor.moveToNext()) {
             val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
             val email = cursor.getString(cursor.getColumnIndexOrThrow("email"))
-            participants.add(mapOf("name" to name, "email" to email))
+            val selectedTheme = cursor.getString(cursor.getColumnIndexOrThrow("selected_theme"))
+            participants.add(mapOf("name" to name, "email" to email, "selected_theme" to selectedTheme))
         }
         cursor.close()
         return participants
@@ -419,14 +425,29 @@ class DatabaseHelper(context:Context):
         return exchanges
     }
 
-    fun updateExchangeDetails(exchangeId: String, theme1: String, theme2: String, theme3: String, date: String, location: String) {
+    fun markDrawAsDone(exchangeId: String) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put("draw_done", 1)
+        }
+        db.update("exchanges", values, "id = ?", arrayOf(exchangeId))
+        db.close()
+    }
+
+
+    fun updateExchangeDetails(exchangeId: String, theme1: String, theme2: String, theme3: String, amount:String,
+                              deadline: String, hour: String, date: String, location: String, data: String) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put("theme1", theme1)
             put("theme2", theme2)
             put("theme3", theme3)
+            put("amount", amount)
+            put("deadline", deadline)
+            put("hour", hour)
             put("date", date)
             put("location", location)
+            put("data",data)
         }
         db.update("exchanges", values, "id = ?", arrayOf(exchangeId))
         db.close()
@@ -450,6 +471,8 @@ class DatabaseHelper(context:Context):
         db.close()
         return isCreator
     }
+
+
 
 
 

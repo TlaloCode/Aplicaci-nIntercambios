@@ -88,15 +88,15 @@ class ConfirmExchangeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.confirmParticipationButton).setOnClickListener {
             val currentUserEmail = getCurrentUserId() // Recupera el correo del usuario actual
             println("El usuario actual es: $currentUserEmail")
-            if (currentUserEmail != null) {
+            if (currentUserEmail != null && selectedTheme != null) {
                 val email = dbHelper.getParticipantEmailById(currentUserEmail)
                 println("El email recuperado es: $email")
-                dbHelper.confirmParticipation(email.toString())
+                dbHelper.confirmParticipation(email.toString(),selectedTheme.toString())
                 Toast.makeText(this, "Has aceptado el intercambio", Toast.LENGTH_SHORT).show()
                 dbHelper.close() // Cierra la conexión a la base de datos
                 finish()
             } else {
-                Toast.makeText(this, "Error al confirmar participación", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Por favor selecciona un tema de regalo", Toast.LENGTH_SHORT).show()
             }
         }
 

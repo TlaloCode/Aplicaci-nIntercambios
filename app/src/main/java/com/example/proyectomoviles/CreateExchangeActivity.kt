@@ -239,7 +239,7 @@ class CreateExchangeActivity: AppCompatActivity() {
     // Método para enviar el correo electrónico
     private fun sendEmailInvitation(email: String, code: String) {
         val subject = "Invitación al intercambio:"
-        val body = "¡Has sido invitado al intercambio '$'!\n\n" +
+        val body = "¡Has sido invitado al intercambio de !\n\n" +
                 "Código de acceso: $code\n" +
                 "Ingresa este código en la app para confirmar tu participación.\n\n" +
                 "¡Esperamos verte pronto!"

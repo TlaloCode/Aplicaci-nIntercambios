@@ -64,9 +64,10 @@ class DrawManager(private val context: Context, private val dbHelper: DatabaseHe
             val giverName = giver["name"] ?: "Sin Nombre"
             val giverEmailOrPhone = giver["email"] ?: giver["number"] ?: ""
             val receiverName = receiver["name"] ?: "Sin Nombre"
+            val giverTheme = giver["selected_theme"] ?: "No seleccionado"
 
             val message = "¡Hola $giverName! Debes darle un regalo a $receiverName en el intercambio.\n" +
-                    "¡No se lo digas a nadie!"
+                    "¡No se lo digas a nadie!, Recuerda que elegiste regalar $giverTheme"
 
             if (giverEmailOrPhone.contains("@")) {
                 sendEmail(giverEmailOrPhone, "Asignación de participante para intercambio", message)

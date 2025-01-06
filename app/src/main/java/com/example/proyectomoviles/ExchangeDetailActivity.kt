@@ -31,6 +31,7 @@ class ExchangeDetailActivity : AppCompatActivity() {
         findViewById<Button>(R.id.advanceDateButton).setOnClickListener {
             val drawManager = DrawManager(this, dbHelper)
             drawManager.performDraw(exchangeId)
+            dbHelper.markDrawAsDone(exchangeId)
         }
 
         findViewById<Button>(R.id.deleteButton).setOnClickListener {
